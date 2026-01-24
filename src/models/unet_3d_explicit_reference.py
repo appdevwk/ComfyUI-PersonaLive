@@ -15,6 +15,7 @@ from diffusers.models.embeddings import TimestepEmbedding, Timesteps
 from diffusers.models.modeling_utils import ModelMixin
 from diffusers.utils import SAFETENSORS_WEIGHTS_NAME, WEIGHTS_NAME, BaseOutput, logging
 from safetensors.torch import load_file
+from src.utils.safe_torch_load import safe_torch_load
 
 from .resnet import InflatedConv3d, InflatedGroupNorm
 from .unet_3d_blocks import UNetMidBlock3DCrossAttn, get_down_block, get_up_block
@@ -687,7 +688,7 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
 
         elif pretrained_model_path.joinpath(WEIGHTS_NAME).exists():
             logger.debug(f"loading weights from {pretrained_model_path} ...")
-            state_dict = torch.load(
+            state_dict = safe_torch_load(
                 pretrained_model_path.joinpath(WEIGHTS_NAME),
                 map_location="cpu",
                 weights_only=True,
@@ -699,7 +700,7 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
         if motion_module_path.exists() and motion_module_path.is_file():
             if motion_module_path.suffix.lower() in [".pth", ".pt", ".ckpt"]:
                 logger.info(f"Load motion module params from {motion_module_path}")
-                motion_state_dict = torch.load(
+                motion_state_dict = safe_torch_load(
                     motion_module_path, map_location="cpu", weights_only=True
                 )
             elif motion_module_path.suffix.lower() == ".safetensors":
